@@ -1,6 +1,7 @@
 import pygame
 import os
 import sys
+from random import choice
 
 
 def magaz():
@@ -314,7 +315,7 @@ class Zam(pygame.sprite.Sprite):
 class Stena(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(okr_sprites, all_sprites)
-        self.image = image_list['stena']
+        self.image = choice(image_list['stena'])
         self.rect = self.image.get_rect().move(tile * x + sd_x, tile * y + sd_y)
         self.x = x
         self.y = y
@@ -388,9 +389,9 @@ class Info(pygame.sprite.Sprite):
         else:
             self.image = image_list['info']
             if y < 5:
-                self.rect = self.image.get_rect().move(x * tile + sd_x - 100, y * tile + sd_y + 110)
+                self.rect = self.image.get_rect().move(x * tile + sd_x - 50, y * tile + sd_y + 110)
             else:
-                self.rect = self.image.get_rect().move(x * tile + sd_x - 100, y * tile + sd_y - 40)
+                self.rect = self.image.get_rect().move(x * tile + sd_x - 50, y * tile + sd_y - 40)
 
     def update(self):
         if pygame.sprite.spritecollideany(self, mouse_sprites):
@@ -415,7 +416,10 @@ image_list = {'luchnik': [load_image('luchnik1.png'), load_image('luchnik2.png')
               'sila': [load_image('sila1.png'), load_image('sila2.png'), load_image('sila3.png')],
               'dal': [load_image('dal1.png'), load_image('dal2.png'), load_image('dal3.png')],
               'zam': [load_image('zam1.png'), load_image('zam2.png'), load_image('zam3.png')],
-              'stena': load_image('stena.png'), 'doroga': load_image('doroga.png'), 'magaz': load_image('magaz.png'),
+              'stena': [load_image('stena1.png'), load_image('stena2.png'), load_image('stena3.png'),
+                        load_image('stena4.png'), load_image('stena5.png'), load_image('stena6.png'),
+                        load_image('stena7.png'), load_image('stena8.png'), load_image('stena9.png')],
+              'doroga': load_image('doroga.png'), 'magaz': load_image('magaz.png'),
               'knopka': [load_image('knopka1.png'), load_image('knopka2.png')], 'buy': load_image('buy.png'),
               'sale': load_image('sale.png'), 'info': load_image('info.png')}
 
