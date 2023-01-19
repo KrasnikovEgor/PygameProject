@@ -65,7 +65,7 @@ class Magaz(pygame.sprite.Sprite):
 class Knopka(pygame.sprite.Sprite):
     def __init__(self, x, y, name):
         super().__init__(magaz_sprites, all_sprites, knopki_sprites)
-        self.image = image_list['knopka'][0]
+        self.image = image_list['knopka'][name][0]
         self.rect = self.image.get_rect().move(x, y)
         self.x = x
         self.y = y
@@ -73,11 +73,11 @@ class Knopka(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
     def update(self):
-        self.image = image_list['knopka'][0]
+        self.image = image_list['knopka'][self.name][0]
         self.rect = self.image.get_rect().move(self.x, self.y)
 
     def new(self):
-        self.image = image_list['knopka'][1]
+        self.image = image_list['knopka'][self.name][1]
         self.rect = self.image.get_rect().move(self.x, self.y)
         return self.name
 
@@ -144,9 +144,9 @@ class Luchnik(pygame.sprite.Sprite):
     def info(self):
         global inform
         self.rad.new()
-        Info('sale', self.x, self.y, self.lv)
-        Info('buy', self.x, self.y, self.lv)
-        Info('info', self.x, self.y, self.lv)
+        Info('sale', self.x, self.y, self.lv, 'luchnik')
+        Info('buy', self.x, self.y, self.lv, 'luchnik')
+        Info('info', self.x, self.y, self.lv, 'luchnik')
         inform = True
 
     def lvup(self):
@@ -180,9 +180,9 @@ class Mass(pygame.sprite.Sprite):
     def info(self):
         global inform
         self.rad.new()
-        Info('sale', self.x, self.y, self.lv)
-        Info('buy', self.x, self.y, self.lv)
-        Info('info', self.x, self.y, self.lv)
+        Info('sale', self.x, self.y, self.lv, 'mass')
+        Info('buy', self.x, self.y, self.lv, 'mass')
+        Info('info', self.x, self.y, self.lv, 'mass')
         inform = True
 
     def lvup(self):
@@ -218,9 +218,9 @@ class Sila(pygame.sprite.Sprite):
     def info(self):
         global inform
         self.rad.new()
-        Info('sale', self.x, self.y, self.lv)
-        Info('buy', self.x, self.y, self.lv)
-        Info('info', self.x, self.y, self.lv)
+        Info('sale', self.x, self.y, self.lv, 'sila')
+        Info('buy', self.x, self.y, self.lv, 'sila')
+        Info('info', self.x, self.y, self.lv, 'sila')
         inform = True
 
     def lvup(self):
@@ -255,9 +255,9 @@ class Dal(pygame.sprite.Sprite):
     def info(self):
         global inform
         self.rad.new()
-        Info('sale', self.x, self.y, self.lv)
-        Info('buy', self.x, self.y, self.lv)
-        Info('info', self.x, self.y, self.lv)
+        Info('sale', self.x, self.y, self.lv, 'dal')
+        Info('buy', self.x, self.y, self.lv, 'dal')
+        Info('info', self.x, self.y, self.lv, 'dal')
         inform = True
 
     def lvup(self):
@@ -292,9 +292,9 @@ class Zam(pygame.sprite.Sprite):
     def info(self):
         global inform
         self.rad.new()
-        Info('sale', self.x, self.y, self.lv)
-        Info('buy', self.x, self.y, self.lv)
-        Info('info', self.x, self.y, self.lv)
+        Info('sale', self.x, self.y, self.lv, 'zam')
+        Info('buy', self.x, self.y, self.lv, 'zam')
+        Info('info', self.x, self.y, self.lv, 'zam')
         inform = True
 
     def lvup(self):
@@ -368,26 +368,27 @@ class Fon(pygame.sprite.Sprite):
 
 
 class Info(pygame.sprite.Sprite):
-    def __init__(self, name, x, y, lv):
+    def __init__(self, name, x, y, lv, tower):
         super().__init__(info_sprites, all_sprites)
         self.lv = lv
+        lv = lv - 1
         self.name = name
         self.x = x
         self.y = y
         if self.name == 'buy':
-            self.image = image_list['buy']
+            self.image = image_list['buy'][tower][lv]
             if y < 5:
                 self.rect = self.image.get_rect().move(x * tile + sd_x - 30, y * tile + sd_y + 150)
             else:
                 self.rect = self.image.get_rect().move(x * tile + sd_x - 30, y * tile + sd_y - 125)
         elif self.name == 'sale':
-            self.image = image_list['sale']
+            self.image = image_list['sale'][tower][lv]
             if y < 5:
                 self.rect = self.image.get_rect().move(x * tile + sd_x + 55, y * tile + sd_y + 150)
             else:
                 self.rect = self.image.get_rect().move(x * tile + sd_x + 55, y * tile + sd_y - 125)
         else:
-            self.image = image_list['info']
+            self.image = image_list['info'][tower][lv]
             if y < 5:
                 self.rect = self.image.get_rect().move(x * tile + sd_x - 50, y * tile + sd_y + 110)
             else:
@@ -420,8 +421,28 @@ image_list = {'luchnik': [load_image('luchnik1.png'), load_image('luchnik2.png')
                         load_image('stena4.png'), load_image('stena5.png'), load_image('stena6.png'),
                         load_image('stena7.png'), load_image('stena8.png'), load_image('stena9.png')],
               'doroga': load_image('doroga.png'), 'magaz': load_image('magaz.png'),
-              'knopka': [load_image('knopka1.png'), load_image('knopka2.png')], 'buy': load_image('buy.png'),
-              'sale': load_image('sale.png'), 'info': load_image('info.png')}
+              'knopka': {'luchnik': [load_image('knopkaluchnik1.png'), load_image('knopkaluchnik2.png')],
+              'mass': [load_image('knopkaluchnik1.png'), load_image('knopkaluchnik2.png')],
+              'sila': [load_image('knopkasila1.png'), load_image('knopkasila2.png')],
+              'dal': [load_image('knopkadal1.png'), load_image('knopkadal2.png')],
+              'zam': [load_image('knopkazam1.png'), load_image('knopkazam2.png')]},
+              'buy': {'luchnik': [load_image('buyluchnik1.png'), load_image('buyluchnik2.png'), load_image('buy3.png')],
+              'mass': [load_image('buymass1.png'), load_image('buymass2.png'), load_image('buy3.png')],
+              'sila': [load_image('buysila1.png'), load_image('buysila2.png'), load_image('buy3.png')],
+              'dal': [load_image('buydal1.png'), load_image('buydal2.png'), load_image('buy3.png')],
+              'zam': [load_image('buyzam1.png'), load_image('buyzam2.png'), load_image('buy3.png')]},
+              'sale': {'luchnik': [load_image('saleluchnik1.png'), load_image('saleluchnik2.png'),
+                                   load_image('saleluchnik3.png')],
+              'mass': [load_image('salemass1.png'), load_image('salemass2.png'), load_image('salemass3.png')],
+              'sila': [load_image('salesila1.png'), load_image('salesila2.png'), load_image('salesila3.png')],
+              'dal': [load_image('saledal1.png'), load_image('saledal2.png'), load_image('saledal3.png')],
+              'zam': [load_image('salezam1.png'), load_image('salezam2.png'), load_image('salezam3.png')]},
+              'info': {'luchnik': [load_image('infoluchnik1.png'), load_image('infoluchnik2.png'),
+                                   load_image('infoluchnik3.png')],
+              'mass': [load_image('infomass1.png'), load_image('infomass2.png'), load_image('infomass3.png')],
+              'sila': [load_image('infosila1.png'), load_image('infosila2.png'), load_image('infosila3.png')],
+              'dal': [load_image('infodal1.png'), load_image('infodal2.png'), load_image('infodal3.png')],
+              'zam': [load_image('infozam1.png'), load_image('infozam2.png'), load_image('infozam3.png')]}}
 
 
 number = 1
@@ -519,7 +540,7 @@ if __name__ == '__main__':
         rad_sprites.draw(screen)
         info_sprites.draw(screen)
         magaz_sprites.draw(screen)
-        string_rendered = font.render(str(coin), 1, pygame.Color('white'))
+        string_rendered = font.render(str(coin), True, pygame.Color('white'))
         intro_rect = string_rendered.get_rect()
         intro_rect.top = 20
         intro_rect.x = 1570
