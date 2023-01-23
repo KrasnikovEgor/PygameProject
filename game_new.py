@@ -61,10 +61,10 @@ def game(screen, number):
         Magaz()
         nonlocal knopki_list
         knopki_list += [Knopka(1560, 65, 'mass')]
-        knopki_list += [Knopka(1560, 260, 'luchnik')]
-        knopki_list += [Knopka(1560, 455, 'zam')]
-        knopki_list += [Knopka(1560, 650, 'dal')]
-        knopki_list += [Knopka(1560, 845, 'sila')]
+        knopki_list += [Knopka(1560, 255, 'luchnik')]
+        knopki_list += [Knopka(1560, 445, 'zam')]
+        knopki_list += [Knopka(1560, 635, 'dal')]
+        knopki_list += [Knopka(1560, 825, 'sila')]
         MassImage(1780, 90)
         LuchnikImage(1780, 285)
         ZamImage(1780, 480)
@@ -72,6 +72,8 @@ def game(screen, number):
         SilaImage(1780, 870)
         Paus()
         knopki_list += [Speed()]
+        Heart()
+        Coin()
 
     def load_image(name, colorkey=None):
         fullname = os.path.join('data', name)
@@ -213,6 +215,24 @@ def game(screen, number):
             elif drctn == 'u':
                 posy -= 1
         return level_map
+
+    class Heart(pygame.sprite.Sprite):
+        def __init__(self):
+            super().__init__(magaz_sprites, all_sprites)
+            self.image = image_list['heart']
+            self.rect = self.image.get_rect().move(1840, 990)
+            self.x = 1840
+            self.y = 8
+
+
+    class Coin(pygame.sprite.Sprite):
+        def __init__(self):
+            super().__init__(magaz_sprites, all_sprites)
+            self.image = image_list['coin']
+            self.rect = self.image.get_rect().move(1660, 990)
+            self.x = 1840
+            self.y = 8
+
 
     class Paus(pygame.sprite.Sprite):
         def __init__(self):
@@ -845,7 +865,8 @@ def game(screen, number):
                   'menu': load_image('menu.png'), 'prodoljit': load_image('prodoljit.png'),
                   'restart': load_image('restart.png'),
                   'zvezda1': load_image('zvezda.png'), 'zvezda2': load_image('zvezda2.png'),
-                  'nadpis1': load_image('nadpis1.png'), 'nadpis2': load_image('nadpis2.png')}
+                  'nadpis1': load_image('nadpis1.png'), 'nadpis2': load_image('nadpis2.png'),
+                  'heart': load_image('heart.png'), 'coin': load_image('coin.png')}
 
     inform = False
     all_sprites = pygame.sprite.Group()
@@ -981,10 +1002,15 @@ def game(screen, number):
                 info_sprites.draw(screen)
                 magaz_sprites.draw(screen)
                 string_rendered = font.render(str(coin), True, pygame.Color('white'))
+                string_rendered2 = font.render(str(hp), True, pygame.Color('white'))
                 intro_rect = string_rendered.get_rect()
-                intro_rect.top = 20
+                intro_rect2 = string_rendered2.get_rect()
+                intro_rect.top = 996
                 intro_rect.x = 1570
+                intro_rect2.top = 996
+                intro_rect2.x = 1790
                 screen.blit(string_rendered, intro_rect)
+                screen.blit(string_rendered2, intro_rect2)
                 paus_sprites.draw(screen)
                 pygame.display.flip()
 
