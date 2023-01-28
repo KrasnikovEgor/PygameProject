@@ -791,11 +791,13 @@ def game(screen, number):
             self.max_health = h
             self.health = h
             self.speed = s
+            self.n_speed = s
             self.x, self.y = enemy_way[0][0] + sd_x, enemy_way[0][1] + sd_y
             self.size = 40
             self.type = t
             if self.type == '2':
                 self.speed *= 2
+                self.n_speed *= 2
                 self.max_health //= 1.5
                 self.health //= 1.5
             elif self.type == '3':
@@ -815,6 +817,7 @@ def game(screen, number):
                 new_size = self.size * (0.6 * self.health / self.max_health + 0.4)
                 self.image = pygame.transform.scale(load_image(f'enemy{self.type}.png').convert(), (new_size, new_size))
                 self.rect = self.image.get_rect().move(self.x - new_size // 2, self.y - new_size // 2)
+                self.speed = self.n_speed
 
         def ect_probitie(self, damage):
             nonlocal coin
