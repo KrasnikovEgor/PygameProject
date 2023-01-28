@@ -143,25 +143,25 @@ def game(screen, number):
                 elif drctn == 'u':
                     enemy_way += [(tile * posx + tile // 2, i) for i in
                                   range(tile * (posy + 1) - 1, tile * posy - 1, -1)]
-            elif s == '1':
+            elif s == '1':  # снизу влево
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * (posy + 1) - 1, tile * posy + tile // 2 - 1, -1)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2 - 1, tile * posx - 1, -1)])
                 drctn = 'l'
-            elif s == '2':
+            elif s == '2':  # снизу вправо
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * (posy + 1) - 1, tile * posy + tile // 2 - 1, -1)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2, tile * (posx + 1))])
                 drctn = 'r'
-            elif s == '3':
+            elif s == '3':  # сверху влево
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * posy, tile * posy + tile // 2)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2 - 1, tile * posx - 1, -1)])
                 drctn = 'l'
-            elif s == '4':
+            elif s == '4':  # сверху вправо
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * posy, tile * posy + tile // 2)]
                               + [(i, tile * posy + tile // 2)
@@ -772,17 +772,28 @@ def game(screen, number):
             self.rect = self.image.get_rect().move(self.x, self.y)
 
         def update(self):
-            nonlocal speed
-            if self.target.alive():
-                x_r = self.target.x - self.x
-                y_r = self.target.y - self.y
-                L = ((x_r) ** 2 + (y_r) ** 2) ** 0.5
-                if L:
-                    self.x += int(self.speed * speed * x_r / L)
-                    self.y += int(self.speed * speed * y_r / L)
-                    self.rect = self.image.get_rect().move(self.x, self.y)
+            nonlocal enemy_in_wave, wave, wave_type
+            wave_health = int(wave * 15)
+            if wave < 16:
+                if 0 < enemy_in_wave < 16:
+                    if speed:
+                        enemy = Enemy(wave_health, 1, wave_type)
+                        all_sprites.add(enemy)
+                        enemy_sprites.add(enemy)
+                        pygame.time.set_timer(SPAWN_EVENT, 1500 // speed, True)
+                        enemy_in_wave += 1
+                    else:
+                        pygame.time.set_timer(SPAWN_EVENT, 3000, True)
+                elif enemy_in_wave == 0:
+                    wave_type = choice(['1', '2', '3'])
+                    enemy_in_wave += 1
+                    pygame.time.set_timer(SPAWN_EVENT, 5000 // speed, True)
+                elif enemy_in_wave == 16:
+                    enemy_in_wave = 0
+                    wave += 1
+                    pygame.time.set_timer(SPAWN_EVENT, 2000 // speed, True)
             else:
-                self.kill()
+                win(hp)
 
         def popadanie(self):
             self.target.ect_probitie(self.damage)
@@ -795,11 +806,13 @@ def game(screen, number):
             self.max_health = h
             self.health = h
             self.speed = s
+            self.n_speed = s
             self.x, self.y = enemy_way[0][0] + sd_x, enemy_way[0][1] + sd_y
             self.size = 40
             self.type = t
             if self.type == '2':
                 self.speed *= 2
+                self.n_speed *= 2
                 self.max_health //= 1.5
                 self.health //= 1.5
             elif self.type == '3':
@@ -819,10 +832,13 @@ def game(screen, number):
                 new_size = self.size * (0.6 * self.health / self.max_health + 0.4)
                 self.image = pygame.transform.scale(load_image(f'enemy{self.type}.png').convert(), (new_size, new_size))
                 self.rect = self.image.get_rect().move(self.x - new_size // 2, self.y - new_size // 2)
+                self.speed = self.n_speed
 
         def ect_probitie(self, damage):
+            nonlocal coin
             self.health -= damage
             if self.health <= 0:
+                coin += self.max_health // 5
                 self.kill()
 
     image_list = {'luchnik': [load_image('luchnik1.png'), load_image('luchnik2.png'), load_image('luchnik3.png')],
@@ -882,21 +898,22 @@ def game(screen, number):
     enemy_sprites = pygame.sprite.Group()
     bullet_sprites = pygame.sprite.Group()
     SPAWN_EVENT = pygame.USEREVENT + 1
-    coin = 1000
+    coin = 200
     knopki_list = []
     tile = 100
     sd_x = 20
     sd_y = 20
-    score = 0
 
     if __name__ == '__main__':
         Fon()
         running = True
-        clock = pygame.time.Clock()
         level = generate_level(load_level('levels.txt', number))
         magaz()
         t = 0
         speed = 1
+        wave = 1
+        enemy_in_wave = 0
+        wave_type = 0
         font = pygame.font.Font(None, 50)
         wins = False
         spawn_sprite.update()
