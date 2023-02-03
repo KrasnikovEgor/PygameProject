@@ -66,14 +66,33 @@ def game(screen, number):
         knopki_list += [Knopka(1560, 635, 'dal')]
         knopki_list += [Knopka(1560, 825, 'sila')]
         MassImage(1780, 90)
-        LuchnikImage(1780, 285)
-        ZamImage(1780, 480)
-        DalImage(1780, 675)
-        SilaImage(1780, 870)
+        LuchnikImage(1780, 280)
+        ZamImage(1780, 470)
+        DalImage(1780, 660)
+        SilaImage(1780, 850)
         Paus()
         knopki_list += [Speed()]
         Heart()
         Coin()
+
+
+    class Heart(pygame.sprite.Sprite):
+        def __init__(self):
+            super().__init__(magaz_sprites, all_sprites)
+            self.image = image_list['heart']
+            self.rect = self.image.get_rect().move(1840, 990)
+            self.x = 1840
+            self.y = 8
+
+
+    class Coin(pygame.sprite.Sprite):
+        def __init__(self):
+            super().__init__(magaz_sprites, all_sprites)
+            self.image = image_list['coin']
+            self.rect = self.image.get_rect().move(1660, 990)
+            self.x = 1840
+            self.y = 8
+
 
     def load_image(name, colorkey=None):
         fullname = os.path.join('data', name)
@@ -95,11 +114,9 @@ def game(screen, number):
                     level[y][x] = Doroga(x, y)
                 elif level[y][x] in ['l', 'u', 'r', 'd']:
                     spawn_sprite = Spawn(x, y, type=level[y][x])
-                    print(level[y][x])
                     level[y][x] = spawn_sprite
                 elif level[y][x] in ['L', 'U', 'R', 'D']:
                     end_sprite = End(x, y, type=level[y][x])
-                    print(level[y][x])
                     level[y][x] = end_sprite
 
         return level
@@ -143,25 +160,25 @@ def game(screen, number):
                 elif drctn == 'u':
                     enemy_way += [(tile * posx + tile // 2, i) for i in
                                   range(tile * (posy + 1) - 1, tile * posy - 1, -1)]
-            elif s == '1':
+            elif s == '1':  # снизу влево
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * (posy + 1) - 1, tile * posy + tile // 2 - 1, -1)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2 - 1, tile * posx - 1, -1)])
                 drctn = 'l'
-            elif s == '2':
+            elif s == '2':  # снизу вправо
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * (posy + 1) - 1, tile * posy + tile // 2 - 1, -1)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2, tile * (posx + 1))])
                 drctn = 'r'
-            elif s == '3':
+            elif s == '3':  # сверху влево
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * posy, tile * posy + tile // 2)]
                               + [(i, tile * posy + tile // 2)
                                  for i in range(tile * posx + tile // 2 - 1, tile * posx - 1, -1)])
                 drctn = 'l'
-            elif s == '4':
+            elif s == '4':  # сверху вправо
                 enemy_way += ([(tile * posx + tile // 2, i)
                                for i in range(tile * posy, tile * posy + tile // 2)]
                               + [(i, tile * posy + tile // 2)
@@ -215,24 +232,6 @@ def game(screen, number):
             elif drctn == 'u':
                 posy -= 1
         return level_map
-
-    class Heart(pygame.sprite.Sprite):
-        def __init__(self):
-            super().__init__(magaz_sprites, all_sprites)
-            self.image = image_list['heart']
-            self.rect = self.image.get_rect().move(1840, 990)
-            self.x = 1840
-            self.y = 8
-
-
-    class Coin(pygame.sprite.Sprite):
-        def __init__(self):
-            super().__init__(magaz_sprites, all_sprites)
-            self.image = image_list['coin']
-            self.rect = self.image.get_rect().move(1660, 990)
-            self.x = 1840
-            self.y = 8
-
 
     class Paus(pygame.sprite.Sprite):
         def __init__(self):
@@ -739,13 +738,29 @@ def game(screen, number):
             self.y = y
 
         def update(self):
-            if speed:
-                enemy = Enemy(100, 1, choice(['1', '2', '3']))
-                all_sprites.add(enemy)
-                enemy_sprites.add(enemy)
-                pygame.time.set_timer(SPAWN_EVENT, 1500 // speed, True)
+            nonlocal enemy_in_wave, wave, wave_type
+            wave_health = int(wave * 10)
+            if wave < 16:
+                if 0 < enemy_in_wave < 16:
+                    if speed:
+                        enemy = Enemy(wave_health, 1, wave_type)
+                        all_sprites.add(enemy)
+                        enemy_sprites.add(enemy)
+                        pygame.time.set_timer(SPAWN_EVENT, 1500 // speed, True)
+                        enemy_in_wave += 1
+                    else:
+                        pygame.time.set_timer(SPAWN_EVENT, 3000, True)
+                elif enemy_in_wave == 0:
+                    wave_type = choice(['1', '2', '3'])
+                    enemy_in_wave += 1
+                    pygame.time.set_timer(SPAWN_EVENT, 5000 // speed, True)
+                elif enemy_in_wave == 16:
+                    enemy_in_wave = 0
+                    wave += 1
+                    pygame.time.set_timer(SPAWN_EVENT, 2000 // speed, True)
             else:
-                pygame.time.set_timer(SPAWN_EVENT, 3000, True)
+                win(hp)
+
 
         def info(self):
             pass
@@ -795,11 +810,13 @@ def game(screen, number):
             self.max_health = h
             self.health = h
             self.speed = s
+            self.n_speed = s
             self.x, self.y = enemy_way[0][0] + sd_x, enemy_way[0][1] + sd_y
             self.size = 40
             self.type = t
             if self.type == '2':
                 self.speed *= 2
+                self.n_speed *= 2
                 self.max_health //= 1.5
                 self.health //= 1.5
             elif self.type == '3':
@@ -819,11 +836,15 @@ def game(screen, number):
                 new_size = self.size * (0.6 * self.health / self.max_health + 0.4)
                 self.image = pygame.transform.scale(load_image(f'enemy{self.type}.png').convert(), (new_size, new_size))
                 self.rect = self.image.get_rect().move(self.x - new_size // 2, self.y - new_size // 2)
+                self.speed = self.n_speed
 
         def ect_probitie(self, damage):
+            nonlocal coin
             self.health -= damage
             if self.health <= 0:
+                coin += max(3, self.max_health // 5)
                 self.kill()
+
 
     image_list = {'luchnik': [load_image('luchnik1.png'), load_image('luchnik2.png'), load_image('luchnik3.png')],
                   'mass': [load_image('mass1.png'), load_image('mass2.png'), load_image('mass3.png')],
@@ -882,12 +903,11 @@ def game(screen, number):
     enemy_sprites = pygame.sprite.Group()
     bullet_sprites = pygame.sprite.Group()
     SPAWN_EVENT = pygame.USEREVENT + 1
-    coin = 1000
+    coin = 200
     knopki_list = []
     tile = 100
     sd_x = 20
     sd_y = 20
-    score = 0
 
     if __name__ == '__main__':
         Fon()
@@ -899,6 +919,9 @@ def game(screen, number):
         speed = 1
         font = pygame.font.Font(None, 50)
         wins = False
+        wave = 1
+        enemy_in_wave = 0
+        wave_type = 0
         spawn_sprite.update()
         while running:
                 for event in pygame.event.get():
@@ -1001,16 +1024,21 @@ def game(screen, number):
                 rad_sprites.draw(screen)
                 info_sprites.draw(screen)
                 magaz_sprites.draw(screen)
-                string_rendered = font.render(str(coin), True, pygame.Color('white'))
-                string_rendered2 = font.render(str(hp), True, pygame.Color('white'))
+                string_rendered = font.render(str(int(coin)), True, pygame.Color('white'))
+                string_rendered2 = font.render(str(int(hp)), True, pygame.Color('white'))
+                string_rendered3 = font.render(str(int(wave)) + '/15', True, pygame.Color('white'))
                 intro_rect = string_rendered.get_rect()
                 intro_rect2 = string_rendered2.get_rect()
+                intro_rect3 = string_rendered2.get_rect()
                 intro_rect.top = 996
                 intro_rect.x = 1570
                 intro_rect2.top = 996
                 intro_rect2.x = 1790
+                intro_rect3.top = 20
+                intro_rect3.x = 1580
                 screen.blit(string_rendered, intro_rect)
                 screen.blit(string_rendered2, intro_rect2)
+                screen.blit(string_rendered3, intro_rect3)
                 paus_sprites.draw(screen)
                 pygame.display.flip()
 
@@ -1152,6 +1180,6 @@ def menu2(screen):
 
 
 pygame.init()
-pygame.display.set_caption('Да')
+pygame.display.set_caption('TvS')
 screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 menu1(screen)
